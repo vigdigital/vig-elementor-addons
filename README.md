@@ -37,6 +37,8 @@ VIG Elementor Addons được phát triển & đồng hành bởi **[VIG Digital
 <details>
 <summary><b>Dành cho developer / maintainer</b></summary>
 
+> 📚 *Về sau, tài liệu kỹ thuật đầy đủ sẽ chuyển lên **vigdigital.com** — khi đó mục này rút gọn thành một liên kết.*
+
 **Widget `get_name`:**
 
 | Widget | `get_name` |
