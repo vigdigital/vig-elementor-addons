@@ -1,0 +1,237 @@
+/* ==========================================================================
+   Timeline Widget — Layout & Structural CSS
+   Dynamic colors/typography are handled by Elementor's Controls selectors.
+   ========================================================================== */
+
+.timeline-header-title {
+    text-align: center;
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 50px;
+}
+
+/* --------------------------------------------------------------------------
+   Wrapper & Centre Line
+   -------------------------------------------------------------------------- */
+.elementor-timeline-wrapper {
+    position: relative;
+    width: 100%;
+    padding: 44px 0 96px; 
+    box-sizing: border-box;
+}
+
+.elementor-timeline-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+    background-color: #e0e0e0;
+    transform: translateX(-50%);
+    z-index: 1;
+}
+
+/* --------------------------------------------------------------------------
+   Row
+   -------------------------------------------------------------------------- */
+.timeline-row {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    margin-bottom: 100px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.timeline-row:last-child {
+    margin-bottom: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Dot
+   -------------------------------------------------------------------------- */
+.timeline-dot {
+    position: absolute;
+    left: 50%;
+    top: 12px;
+    transform: translateX(-50%);
+    width: 24px;
+    height: 24px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'%3E%3Ccircle cx='12' cy='12' r='11.5' stroke='%23A0A0A0'/%3E%3Ccircle cx='12' cy='12' r='8' fill='%23066955'/%3E%3C/svg%3E");
+    border-radius: 50%;
+    z-index: 2;
+}
+
+/* --------------------------------------------------------------------------
+   Columns
+   -------------------------------------------------------------------------- */
+.timeline-group-media,
+.timeline-group-content {
+    width: 45%;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+/* Odd (1, 3, …): Image LEFT — Content RIGHT */
+.timeline-row-odd .timeline-group-media {
+    align-items: flex-end;
+    text-align: right;
+}
+
+.timeline-row-odd .timeline-group-content {
+    align-items: flex-start;
+    text-align: left;
+}
+
+/* Even (2, 4, …): Content LEFT — Image RIGHT */
+.timeline-row-even {
+    flex-direction: row-reverse;
+}
+
+.timeline-row-even .timeline-group-content {
+    align-items: flex-end;
+    text-align: right;
+}
+
+.timeline-row-even .timeline-group-media {
+    align-items: flex-start;
+    text-align: left;
+}
+
+/* --------------------------------------------------------------------------
+   Badge (Year)
+   -------------------------------------------------------------------------- */
+.timeline-badge {
+    display: inline-block;
+    background-color: #066955;
+    color: #ffffff;
+    padding: 12px 48px;
+    border-radius: 100px;
+    margin-bottom: 24px;
+    text-align: center;
+    font-family: "Open Sans";
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 1.5;
+}
+
+/* --------------------------------------------------------------------------
+   Title
+   -------------------------------------------------------------------------- */
+.timeline-title {
+    font-size: 24px;
+    color: #066955;
+    font-weight: 700;
+    margin: 0 0 20px 0;
+    line-height: 1.2;
+}
+
+/* --------------------------------------------------------------------------
+   Content box
+   -------------------------------------------------------------------------- */
+.timeline-content-box {
+    background-color: #f5f3ed;
+    padding: 24px 30px;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 480px;
+    box-sizing: border-box;
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: #333333;
+    text-align: left;
+}
+
+/* --------------------------------------------------------------------------
+   Media
+   -------------------------------------------------------------------------- */
+.timeline-media-container {
+    width: 100%;
+    max-width: 480px;
+    box-sizing: border-box;
+    margin-bottom: 24px;
+}
+
+.timeline-media-image img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Logo grid */
+.timeline-logo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    width: 100%;
+    align-items: center;
+    justify-items: center;
+    margin-top: 10px;
+}
+
+.timeline-logo-item img {
+    max-width: 100%;
+    max-height: 50px;
+    height: auto;
+    object-fit: contain;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive — Mobile
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+    
+    .elementor-timeline-wrapper {
+        padding: 32px 0 70px; 
+    }
+    .elementor-timeline-wrapper::before {
+        left: 20px;
+        transform: none;
+    }
+
+    .timeline-row {
+        flex-direction: column !important;
+        padding-left: 45px;
+        margin-bottom: 64px;
+    }
+
+    .timeline-dot {
+        left: 20px;
+        transform: translateX(-50%);
+        top: 8px;
+    }
+
+    .timeline-group-media,
+    .timeline-group-content {
+        width: 100% !important;
+        align-items: flex-start !important;
+        text-align: left !important;
+    }
+
+    .timeline-group-media {
+        /* margin-bottom: 15px; */
+    }
+
+    .timeline-badge {
+        /* margin-bottom: 15px; */
+    }
+
+    .timeline-title {
+        /* margin-bottom: 10px; */
+        font-size: 20px;
+    }
+
+    .timeline-content-box {
+        max-width: 100%;
+        padding: 24px;
+    }
+
+    .timeline-logo-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        justify-items: start;
+    }
+}

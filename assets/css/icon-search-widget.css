@@ -1,0 +1,137 @@
+/* Icon Search Widget Styles */
+.header-search-widget-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+/* Nút kích hoạt kính lúp chính */
+.header-search-trigger {
+    background: none;
+    border: none;
+    padding: 10px;
+    border-radius: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
+    transition: transform 0.3s ease;
+}
+
+.header-search-trigger:hover {
+    background-color: transparent;
+}
+
+.header-search-trigger svg {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: stroke 0.3s ease;
+}
+
+/* Hộp Dropdown bên ngoài khớp hình ảnh mẫu */
+.header-search-dropdown {
+    position: absolute;
+    top: 100%;
+    margin-top: 15px;
+    background-color: #ffffff;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    border: 1px solid #333333;
+    border-radius: 4px;
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Class kích hoạt hiển thị Dropdown mượt mà */
+.header-search-dropdown.active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+/* Căn lề Dropdown */
+.dropdown-align-right {
+    right: 0;
+}
+
+.dropdown-align-left {
+    left: 0;
+}
+
+/* Thiết kế dải bao bọc hình con nhộng (Pill) */
+.search-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    border: 1px solid #e0e0e0;
+    border-radius: 25px;
+    background-color: #ffffff;
+    padding-left: 15px;
+    height: 44px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* Kính lúp nhỏ bên trong ô nhập */
+.input-search-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+.input-search-icon svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* Ô nhập dữ liệu trơn */
+.search-field {
+    border: none !important;
+    background: transparent !important;
+    outline: none !important;
+    box-shadow: none !important;
+    flex-grow: 1;
+    height: 100%;
+    font-size: 14px;
+    color: #333333;
+    padding: 0;
+    margin: 0;
+}
+
+/* Nút Tìm kiếm (Search) bên phải pill */
+.search-submit {
+    height: 100%;
+    background-color: #066955;
+    color: #ffffff;
+    border: none;
+    outline: none;
+    padding: 0 25px;
+    font-size: 14px;
+    font-weight: 600;
+    border-top-right-radius: 25px;
+    border-bottom-right-radius: 25px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+}
+
+@media (max-width: 768px) {
+    .search-input-wrapper {
+        max-width: 300px;
+    }
+
+    .elementor-widget-icon_search .dropdown-align-right {
+        right: 10px;
+    }
+}
