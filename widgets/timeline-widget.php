@@ -20,7 +20,7 @@ class Timeline_Widget extends Widget_Base
 
     public function get_title()
     {
-        return esc_html__('Timeline', 'vig-elementor-addons');
+        return esc_html__('VIG Timeline', 'vig-elementor-addons');
     }
 
     public function get_icon()
@@ -61,7 +61,7 @@ class Timeline_Widget extends Widget_Base
             [
                 'label' => esc_html__('Title text', 'vig-elementor-addons'),
                 'type' => Controls_Manager::TEXT,
-                'default' => esc_html__('Timeline', 'vig-elementor-addons'),
+                'default' => esc_html__('VIG Timeline', 'vig-elementor-addons'),
                 'condition' => [
                     'show_header_title' => 'yes',
                 ],

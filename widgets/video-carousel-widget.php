@@ -24,7 +24,7 @@ class Video_Carousel_Widget extends Widget_Base
 
     public function get_title()
     {
-        return esc_html__('Video Carousel', 'vig-elementor-addons');
+        return esc_html__('VIG Video Carousel', 'vig-elementor-addons');
     }
 
     public function get_icon()
@@ -70,6 +70,21 @@ class Video_Carousel_Widget extends Widget_Base
                 ],
             ]
         );
+
+        $this->add_control(
+            'display_style',
+            [
+                'label'       => esc_html__('Display style (desktop)', 'vig-elementor-addons'),
+                'type'        => Controls_Manager::SELECT,
+                'default'     => 'a_three',
+                'options'     => [
+                    'a_three' => esc_html__('A — 3 videos, full', 'vig-elementor-addons'),
+                    'b_peek'  => esc_html__('B — 4 videos, first & last peek 2/3', 'vig-elementor-addons'),
+                ],
+                'description' => esc_html__('A: shows 3 full videos in a row. B: shows 2 full videos in the middle with the first and last partially visible (peek).', 'vig-elementor-addons'),
+            ]
+        );
+
         $repeater = new Repeater();
 
         $repeater->add_control(
@@ -173,28 +188,8 @@ class Video_Carousel_Widget extends Widget_Base
             ]
         );
 
-        $this->add_control(
-            'slide_min_height',
-            [
-                'label'      => esc_html__('Slide minimum height', 'vig-elementor-addons'),
-                'type'       => Controls_Manager::SLIDER,
-                'size_units' => ['px'],
-                'range'      => [
-                    'px' => [
-                        'min'  => 100,
-                        'max'  => 800,
-                        'step' => 10,
-                    ],
-                ],
-                'default'    => [
-                    'unit' => 'px',
-                    'size' => 380,
-                ],
-                'selectors'  => [
-                    '{{WRAPPER}} .video-slide-card' => 'min-height: {{SIZE}}{{UNIT}};',
-                ],
-            ]
-        );
+        // Video thumbnail giữ tỷ lệ 16:9 (chuẩn YouTube) qua CSS aspect-ratio.
+        // Control "slide_min_height" đã gỡ 20/07/2026 — min-height cố định phá tỷ lệ.
 
         $this->add_group_control(
             Group_Control_Typography::get_type(),
@@ -222,15 +217,16 @@ class Video_Carousel_Widget extends Widget_Base
 
     protected function render()
     {
-        $settings  = $this->get_settings_for_display();
-        $items     = $settings['carousel_items'];
-        $widget_id = $this->get_id();
+        $settings      = $this->get_settings_for_display();
+        $items         = $settings['carousel_items'];
+        $widget_id     = $this->get_id();
+        $display_style = ! empty($settings['display_style']) ? $settings['display_style'] : 'a_three';
 
         wp_enqueue_script('swiper');
         wp_enqueue_style('swiper');
 ?>
 
-        <div class="video-carousel-container">
+        <div class="video-carousel-container video-mode-<?php echo esc_attr('b_peek' === $display_style ? 'b' : 'a'); ?>">
             <?php if ('yes' === $settings['show_header_title'] && ! empty($settings['header_title_text'])) : ?>
                 <h2 class="carousel-header-title" style="text-align: center; font-size: 36px; font-weight: 700; margin-bottom: 40px;">
                     <?php echo esc_html($settings['header_title_text']); ?>
@@ -238,6 +234,7 @@ class Video_Carousel_Widget extends Widget_Base
             <?php endif; ?>
 
             <?php if (! empty($items)) : ?>
+                <div class="video-peek-mask">
                 <div class="swiper-container swiper-<?php echo esc_attr($widget_id); ?>">
                     <div class="swiper-wrapper swiper-wrapper-custom">
                         <?php foreach ($items as $item) :
@@ -269,6 +266,7 @@ class Video_Carousel_Widget extends Widget_Base
                         </svg>
                     </div>
                 </div>
+                </div><!-- .video-peek-mask -->
             <?php endif; ?>
         </div>
 
@@ -288,11 +286,21 @@ class Video_Carousel_Widget extends Widget_Base
                     var swiperEl = document.querySelector('.swiper-<?php echo esc_attr($widget_id); ?>');
                     if (!swiperEl) return;
 
+                    var DISPLAY_STYLE = '<?php echo esc_js($display_style); ?>';
+                    var IS_B = (DISPLAY_STYLE === 'b_peek');
+
+                    // Kiểu B (desktop): swiper thu hẹp 60% + overflow visible (xem CSS .video-mode-b),
+                    // 2 video full ở giữa, 2 slide kề tràn vào vùng 20% mỗi bên → ló ~2/3 (peek đối xứng).
+                    // loop để mép trái luôn có nội dung ngay từ vị trí đầu.
+                    var vigDesktopCfg = IS_B
+                        ? { slidesPerView: 2, centeredSlides: false, spaceBetween: 24 }
+                        : { slidesPerView: 3, centeredSlides: false, spaceBetween: 24 };
+
                     var swiper = new Swiper(swiperEl, {
-                        slidesPerView: 1.2,
+                        slidesPerView: 1.15,
                         centeredSlides: true,
                         spaceBetween: 15,
-                        loop: false,
+                        loop: IS_B,
                         observer: true,
                         observeParents: true,
                         navigation: {
@@ -301,13 +309,11 @@ class Video_Carousel_Widget extends Widget_Base
                         },
                         breakpoints: {
                             768: {
-                                slidesPerView: 1.5,
-                                spaceBetween: 25,
+                                slidesPerView: 2,
+                                centeredSlides: false,
+                                spaceBetween: 20,
                             },
-                            1024: {
-                                slidesPerView: 1.6,
-                                spaceBetween: 30,
-                            }
+                            1024: vigDesktopCfg
                         }
                     });
 

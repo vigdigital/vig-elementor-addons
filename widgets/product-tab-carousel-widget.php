@@ -23,7 +23,7 @@ class Product_Tab_Carousel_Widget extends Widget_Base
 
     public function get_title(): string
     {
-        return esc_html__('Product Carousel Tabs', 'vig-elementor-addons');
+        return esc_html__('VIG Product Carousel Tabs', 'vig-elementor-addons');
     }
 
     public function get_icon(): string
@@ -474,25 +474,6 @@ class Product_Tab_Carousel_Widget extends Widget_Base
             }
         }
 
-        // Dịch slug danh mục sang ngôn ngữ hiện tại (Polylang) — tránh mất sản phẩm/tab khi đổi ngôn ngữ.
-        if (! empty($selected_cats) && function_exists('pll_get_term')) {
-            $translated = [];
-            foreach ($selected_cats as $slug) {
-                $t = get_term_by('slug', $slug, 'product_cat');
-                if (! $t || is_wp_error($t)) {
-                    continue;
-                }
-                $tr_id = pll_get_term((int) $t->term_id);
-                $tr    = $tr_id ? get_term((int) $tr_id, 'product_cat') : $t;
-                if ($tr && ! is_wp_error($tr)) {
-                    $translated[] = $tr->slug;
-                }
-            }
-            if ($translated) {
-                $selected_cats = array_values(array_unique($translated));
-            }
-        }
-
         // Tạo Term Objects để render tên tab điều hướng
         $active_tabs = [];
         if (! empty($selected_cats)) {
@@ -557,20 +538,8 @@ class Product_Tab_Carousel_Widget extends Widget_Base
             wp_reset_postdata();
         }
 
-        // Đếm lại xem có dữ liệu của tab nào trống không để lọc ra
-        $valid_tabs = [];
-        foreach ($active_tabs as $tab) {
-            if (! empty($grouped_products[$tab->slug])) {
-                $valid_tabs[] = $tab;
-            }
-        }
-
-        if (empty($valid_tabs)) {
-            if (current_user_can('edit_posts')) {
-                printf('<p>%s</p>', esc_html__('[VDP] No products found in the selected categories.', 'vig-elementor-addons'));
-            }
-            return;
-        }
+        // Luôn hiển thị đủ tab cho mọi danh mục đã chọn/tồn tại, kể cả danh mục chưa có sản phẩm.
+        $valid_tabs = $active_tabs;
 
         // Cấu hình responsive
         $per_desktop = max(1, floatval($settings['slides_per_view_desktop']));
@@ -601,13 +570,13 @@ class Product_Tab_Carousel_Widget extends Widget_Base
                 line-height: 1.2;
             }
 
-            /* Tabs điều hướng */
+            /* Tabs điều hướng — luôn 1 hàng, chia đều theo số lượng tab (giống nav-menu "Justify" của Elementor ở trang product_cat) */
             .vdp-pc__tabs-nav {
                 display: flex;
                 justify-content: space-between;
                 gap: 24px;
                 margin-bottom: 45px;
-                flex-wrap: wrap;
+                flex-wrap: nowrap;
                 max-width: 100%;
                 width: 1200px;
                 margin-left: auto;
@@ -626,7 +595,11 @@ class Product_Tab_Carousel_Widget extends Widget_Base
                 cursor: pointer;
                 transition: all 0.3s ease;
                 outline: none;
-                width: 282px;
+                flex: 1 1 0;
+                min-width: 0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
             .vdp-pc__tab-btn.active {
@@ -647,6 +620,14 @@ class Product_Tab_Carousel_Widget extends Widget_Base
 
             .vdp-pc__tab-content.active {
                 display: block;
+            }
+
+            .vdp-pc__empty {
+                text-align: center;
+                color: #888888;
+                font-size: 16px;
+                padding: 60px 20px;
+                margin: 0;
             }
 
             /* Khóa hiệu ứng trên Swiper slide để tránh lỗi kẹt điều hướng */
@@ -778,11 +759,12 @@ class Product_Tab_Carousel_Widget extends Widget_Base
 
             @media (max-width: 1024px) {
                 .vdp-pc__tab-btn {
-                    width: 45%;
-                    width: calc(50% - 12px);
+                    flex: 0 0 calc(50% - 12px);
+                    white-space: normal;
                 }
 
                 .vdp-pc__tabs-nav {
+                    flex-wrap: wrap;
                     padding-left: 16px;
                     padding-right: 16px;
                 }
@@ -832,6 +814,9 @@ class Product_Tab_Carousel_Widget extends Widget_Base
                     $products = $grouped_products[$tab_slug];
                 ?>
                     <div class="vdp-pc__tab-content <?php echo $index === 0 ? 'active' : ''; ?>" id="tab-content-<?php echo esc_attr($uid); ?>-<?php echo esc_attr($tab_slug); ?>">
+                        <?php if (empty($products)) : ?>
+                            <p class="vdp-pc__empty"><?php esc_html_e('Coming soon.', 'vig-elementor-addons'); ?></p>
+                        <?php else : ?>
                         <div class="swiper-container swiper-container-prod" data-tab-id="<?php echo esc_attr($tab_slug); ?>">
                             <div class="swiper-wrapper">
                                 <?php foreach ($products as $prod) : ?>
@@ -866,6 +851,7 @@ class Product_Tab_Carousel_Widget extends Widget_Base
                                 </div>
                             <?php endif; ?>
                         </div>
+                        <?php endif; ?>
                     </div>
                 <?php endforeach; ?>
             </div>

@@ -24,7 +24,7 @@ class Icon_Search_Widget extends Widget_Base
 
     public function get_title()
     {
-        return esc_html__('Icon Search', 'vig-elementor-addons');
+        return esc_html__('VIG Icon Search', 'vig-elementor-addons');
     }
 
     public function get_icon()

@@ -11,7 +11,7 @@
 .video-slide-card {
 	position: relative;
 	width: 100%;
-	min-height: 380px;
+	aspect-ratio: 16 / 9;
 	background-color: #333333;
 	background-size: cover;
 	background-position: center;
@@ -175,5 +175,19 @@
 	.swiper-button-custom {
 		height: 60px;
 		width: 40px;
+	}
+}
+/* ---- Kiểu B: peek đối xứng [2/3][full][full][2/3] ---- */
+/* Mask cắt ngang; swiper thu hẹp 60% + overflow visible → 2 slide kề tràn vào vùng 20% mỗi bên (~2/3 slide). */
+.video-mode-b .video-peek-mask {
+	overflow-x: clip;
+}
+
+@media (min-width: 1024px) {
+	.video-mode-b .video-peek-mask .swiper-container {
+		overflow: visible;
+		width: 60%;
+		margin-left: auto;
+		margin-right: auto;
 	}
 }

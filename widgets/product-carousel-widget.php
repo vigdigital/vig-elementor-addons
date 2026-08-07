@@ -23,7 +23,7 @@ class Product_Carousel_Widget extends Widget_Base
 
     public function get_title(): string
     {
-        return esc_html__('Product Carousel', 'vig-elementor-addons');
+        return esc_html__('VIG Product Carousel', 'vig-elementor-addons');
     }
 
     public function get_icon(): string
@@ -438,17 +438,10 @@ class Product_Carousel_Widget extends Widget_Base
             'no_found_rows'  => true,
         ];
 
-        // Lọc theo danh mục nếu được chọn — dịch term sang ngôn ngữ hiện tại (Polylang)
-        // để không mất sản phẩm khi xem ở ngôn ngữ khác (slug danh mục khác nhau theo ngôn ngữ).
+        // Lọc theo danh mục nếu được chọn.
         if (! empty($settings['product_cat'])) {
             $term    = get_term_by('slug', sanitize_text_field($settings['product_cat']), 'product_cat');
             $term_id = ($term && ! is_wp_error($term)) ? (int) $term->term_id : 0;
-            if ($term_id && function_exists('pll_get_term')) {
-                $translated = pll_get_term($term_id); // term_id ở ngôn ngữ hiện tại
-                if ($translated) {
-                    $term_id = (int) $translated;
-                }
-            }
             if ($term_id) {
                 $query_args['tax_query'] = [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
                     [
