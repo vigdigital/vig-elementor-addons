@@ -555,6 +555,16 @@ class Product_Tab_Carousel_Widget extends Widget_Base
         $btn_url  = ! empty($settings['button_url']['url']) ? esc_url($settings['button_url']['url']) : '#';
         $btn_target = ! empty($settings['button_url']['is_external']) ? ' target="_blank" rel="noopener noreferrer"' : '';
 
+        // Nút "View all products" trỏ vào danh mục (product_cat archive) của tab đang mở.
+        // Map slug -> URL danh mục; JS đổi href theo tab active. Fallback về button_url nếu lỗi.
+        $tab_cat_urls = [];
+        foreach ($valid_tabs as $tab) {
+            $term_link = get_term_link($tab);
+            $tab_cat_urls[$tab->slug] = ! is_wp_error($term_link) ? $term_link : '';
+        }
+        $first_tab_slug  = ! empty($valid_tabs) ? $valid_tabs[0]->slug : '';
+        $btn_initial_url = ($first_tab_slug !== '' && ! empty($tab_cat_urls[$first_tab_slug])) ? $tab_cat_urls[$first_tab_slug] : $btn_url;
+
         wp_enqueue_script('swiper');
         wp_enqueue_style('swiper');
 ?>
@@ -868,7 +878,7 @@ class Product_Tab_Carousel_Widget extends Widget_Base
             <!-- Nút xem tất cả -->
             <?php if ('yes' === $settings['show_button'] && ! empty($settings['button_text'])) : ?>
                 <div class="vdp-pc__btn-wrap">
-                    <a href="<?php echo esc_url($btn_url); ?>" <?php echo $btn_target; ?> class="vdp-pc__btn">
+                    <a href="<?php echo esc_url($btn_initial_url); ?>" class="vdp-pc__btn" data-view-all-btn>
                         <?php echo esc_html($settings['button_text']); ?>
                     </a>
                 </div>
@@ -916,6 +926,8 @@ class Product_Tab_Carousel_Widget extends Widget_Base
                     if (widget) {
                         var buttons = widget.querySelectorAll('.vdp-pc__tab-btn');
                         var contents = widget.querySelectorAll('.vdp-pc__tab-content');
+                        var catUrls = <?php echo wp_json_encode($tab_cat_urls); ?>;
+                        var viewAllBtn = widget.querySelector('[data-view-all-btn]');
 
                         buttons.forEach(function(btn) {
                             btn.addEventListener('click', function(e) {
@@ -927,6 +939,11 @@ class Product_Tab_Carousel_Widget extends Widget_Base
                                     b.classList.remove('active');
                                 });
                                 this.classList.add('active');
+
+                                // Nút "View all products" trỏ vào danh mục của tab đang mở
+                                if (viewAllBtn && catUrls[targetTab]) {
+                                    viewAllBtn.setAttribute('href', catUrls[targetTab]);
+                                }
 
                                 // Active khối nội dung
                                 contents.forEach(function(content) {
