@@ -332,9 +332,19 @@ class Product_Tab_Carousel_Widget extends Widget_Base
         $this->add_control('card_padding', [
             'label'     => esc_html__('Card padding (px)', 'vig-elementor-addons'),
             'type'      => Controls_Manager::SLIDER,
-            'default'   => ['size' => 30],
+            'default'   => ['size' => 16],
             'range'     => ['px' => ['min' => 0, 'max' => 80]],
             'selectors' => ['{{WRAPPER}} .vdp-pc__card-pr' => 'padding: {{SIZE}}px;'],
+        ]);
+
+        // Khoảng trống (gap) bao quanh hình trong card — số nhỏ = hình to, gap hẹp.
+        $this->add_control('card_img_gap', [
+            'label'       => esc_html__('Image gap (px)', 'vig-elementor-addons'),
+            'type'        => Controls_Manager::SLIDER,
+            'default'     => ['size' => 8],
+            'range'       => ['px' => ['min' => 0, 'max' => 60]],
+            'description' => esc_html__('Space around the product image. Smaller = larger image / tighter gap.', 'vig-elementor-addons'),
+            'selectors'   => ['{{WRAPPER}} .vdp-pc__card-img' => 'padding: {{SIZE}}px;'],
         ]);
 
         $this->end_controls_section();
@@ -492,50 +502,43 @@ class Product_Tab_Carousel_Widget extends Widget_Base
             return;
         }
 
-        // 2. Truy vấn tất cả sản phẩm thuộc các danh mục được chọn
-        $query_args = [
-            'post_type'      => 'product',
-            'post_status'    => 'publish',
-            'posts_per_page' => absint($settings['posts_per_page']),
-            'orderby'        => sanitize_key($settings['orderby']),
-            'order'          => 'DESC' === $settings['order'] ? 'DESC' : 'ASC',
-            'tax_query'      => [
-                [
-                    'taxonomy' => 'product_cat',
-                    'field'    => 'slug',
-                    'terms'    => $selected_cats,
-                ],
-            ],
-        ];
-
-        $query = new \WP_Query($query_args);
-
-        // Khởi tạo mảng phân tách sản phẩm theo từng danh mục slug trong PHP để tối ưu hiệu suất truy vấn
+        // 2. Truy vấn sản phẩm cho TỪNG danh mục riêng biệt.
+        // Mỗi tab lấy tối đa `posts_per_page` (control "Max products per tab") sản phẩm của
+        // chính danh mục đó. KHÔNG dùng 1 query gộp với posts_per_page cap TỔNG rồi mới nhóm,
+        // vì như vậy sẽ cắt hết sản phẩm của các danh mục xếp ngoài giới hạn -> tab có hàng
+        // vẫn hiển thị "Coming soon".
         $grouped_products = [];
         foreach ($selected_cats as $slug) {
             $grouped_products[$slug] = [];
-        }
 
-        if ($query->have_posts()) {
-            while ($query->have_posts()) {
-                $query->the_post();
-                global $post;
-                $post_terms = wp_get_post_terms($post->ID, 'product_cat');
-                if (! is_wp_error($post_terms)) {
-                    foreach ($post_terms as $term) {
-                        if (in_array($term->slug, $selected_cats)) {
-                            $grouped_products[$term->slug][] = [
-                                'id'        => get_the_ID(),
-                                'title'     => get_the_title(),
-                                'permalink' => get_the_permalink(),
-                                'thumbnail' => get_the_post_thumbnail(get_the_ID(), 'medium', ['alt' => get_the_title()]),
-                                'has_thumb' => has_post_thumbnail(),
-                            ];
-                        }
-                    }
+            $cat_query = new \WP_Query([
+                'post_type'      => 'product',
+                'post_status'    => 'publish',
+                'posts_per_page' => absint($settings['posts_per_page']),
+                'orderby'        => sanitize_key($settings['orderby']),
+                'order'          => 'DESC' === $settings['order'] ? 'DESC' : 'ASC',
+                'tax_query'      => [
+                    [
+                        'taxonomy' => 'product_cat',
+                        'field'    => 'slug',
+                        'terms'    => [$slug],
+                    ],
+                ],
+            ]);
+
+            if ($cat_query->have_posts()) {
+                while ($cat_query->have_posts()) {
+                    $cat_query->the_post();
+                    $grouped_products[$slug][] = [
+                        'id'        => get_the_ID(),
+                        'title'     => get_the_title(),
+                        'permalink' => get_the_permalink(),
+                        'thumbnail' => get_the_post_thumbnail(get_the_ID(), 'medium_large', ['alt' => get_the_title()]),
+                        'has_thumb' => has_post_thumbnail(),
+                    ];
                 }
+                wp_reset_postdata();
             }
-            wp_reset_postdata();
         }
 
         // Luôn hiển thị đủ tab cho mọi danh mục đã chọn/tồn tại, kể cả danh mục chưa có sản phẩm.
@@ -646,7 +649,7 @@ class Product_Tab_Carousel_Widget extends Widget_Base
             .vdp-pc__card-pr {
                 background-color: #f5f3ed;
                 border-radius: 16px;
-                padding: 30px 20px;
+                padding: 16px;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
@@ -669,11 +672,17 @@ class Product_Tab_Carousel_Widget extends Widget_Base
                 justify-content: center;
                 width: 100%;
                 height: 220px;
-                margin-bottom: 20px;
+                margin-bottom: 16px;
+                padding: 8px;
+                box-sizing: border-box;
             }
 
-            .vdp-pc__card-img img {
-                max-width: 90%;
+            /* Scope theo #<?php echo esc_attr($uid); ?> để THẮNG rule '.vdp-pc__card-img img{width:200px;height:200px}'
+               trong product-carousel-widget.css (class .vdp-pc__ dùng chung 2 widget) — nếu không ảnh bị khoá 200px. */
+            #<?php echo esc_attr($uid); ?> .vdp-pc__card-img img {
+                width: 100%;
+                height: 100%;
+                max-width: 100%;
                 max-height: 100%;
                 object-fit: contain;
                 mix-blend-mode: multiply;
@@ -773,7 +782,7 @@ class Product_Tab_Carousel_Widget extends Widget_Base
             @media (max-width: 768px) {
                 .vdp-pc__card-pr {
                     height: 320px;
-                    padding: 20px;
+                    padding: 14px;
                 }
 
                 .vdp-pc__card-img {
